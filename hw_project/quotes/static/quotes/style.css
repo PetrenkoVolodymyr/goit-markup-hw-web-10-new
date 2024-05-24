@@ -64,3 +64,8 @@ ul.pager {
 .disabled {
     color:#333333;
 }
+
+.pager li>a:hover, .pager li>span :hover {
+    background-color:#3677E8;
+    color: #ffffff;
+}
