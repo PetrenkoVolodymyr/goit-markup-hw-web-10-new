@@ -5,7 +5,7 @@ from django import template
 register = template.Library()
 
 def get_author(id_):
-    return id_.fullname
+    return id_.id
 
 
-register.filter('author', get_author)
+register.filter('id', get_author)
