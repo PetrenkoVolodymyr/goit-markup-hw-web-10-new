@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
+from django.db.models import Count
 
 from .models import Author, Tag, Quote
 from .forms import TagForm, AuthorForm, QuoteForm
@@ -8,11 +9,13 @@ from django.contrib.auth.decorators import login_required
 
 def main(request, page = 1):
     quotes = Quote.objects.all()
+    top_tags = Tag.objects.annotate(num_posts=Count('posts')).order_by('-num_posts')[:10]
+    print(top_tags)
     per_page = 10
     paginator = Paginator(list(quotes), per_page)
     quotes_on_page = paginator.page(page)
    
-    return render(request,'quotes/index.html', context={'quotes':quotes_on_page})
+    return render(request,'quotes/index.html', context={'quotes':quotes_on_page, 'top_tags': top_tags})
 
 def detail(request, quote_id):
     author = get_object_or_404(Author, pk=quote_id)
@@ -59,12 +62,7 @@ def addquote(request):
         if form.is_valid():
             new_note = form.save()
 
-    # tag = get_object_or_404(Tag, pk=tag_id)
-    # quotes = Quote.objects.filter(tags=tag)
-
             choice_tags = Tag.objects.filter(name__in=request.POST.getlist('tags'))
-            # tagss = get_object_or_404(Author, fullname='authorid')
-            # print(tagss)
             choice_author = Author.objects.filter(fullname__in=request.POST.getlist('authorid'))
             for tag in choice_tags.iterator():
                 print(tag)
