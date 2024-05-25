@@ -2,7 +2,9 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
 
 from .models import Author, Tag, Quote
-from .forms import TagForm, AuthorForm
+from .forms import TagForm, AuthorForm, QuoteForm
+
+from django.contrib.auth.decorators import login_required
 
 def main(request, page = 1):
     quotes = Quote.objects.all()
@@ -21,6 +23,7 @@ def tags(request, tag_id):
     quotes = Quote.objects.filter(tags=tag)
     return render(request, 'quotes/tags.html', context={"quotes": quotes, "tag": tag})
 
+@login_required
 def addtag(request):
     if request.method == 'POST':
         form = TagForm(request.POST)
@@ -32,7 +35,7 @@ def addtag(request):
 
     return render(request, 'quotes/addtag.html', {'form': TagForm()})
 
-
+@login_required
 def addauthor(request):
     if request.method == 'POST':
         form = AuthorForm(request.POST)
@@ -45,3 +48,39 @@ def addauthor(request):
     return render(request, 'quotes/addauthor.html', {'form': AuthorForm()})
 
 
+@login_required
+def addquote(request):
+    tags = Tag.objects.all()
+    authors = Author.objects.all()
+
+    if request.method == 'POST':
+        form = QuoteForm(request.POST)
+
+        if form.is_valid():
+            new_note = form.save()
+
+    # tag = get_object_or_404(Tag, pk=tag_id)
+    # quotes = Quote.objects.filter(tags=tag)
+
+            choice_tags = Tag.objects.filter(name__in=request.POST.getlist('tags'))
+            # tagss = get_object_or_404(Author, fullname='authorid')
+            # print(tagss)
+            choice_author = Author.objects.filter(fullname__in=request.POST.getlist('authorid'))
+            for tag in choice_tags.iterator():
+                print(tag)
+                new_note.tags.add(tag)
+            print(choice_author)
+            for author in choice_author.iterator():
+                print(author)
+                print(author.id)
+                print(new_note.author)
+                new_note.author = author
+                print(new_note.author)
+                print(new_note.author_id)
+
+
+            return redirect(to='quotes:root')
+        else:
+            return render(request, 'quotes/addquote.html', {"tags": tags, "authors": authors, 'form': form})
+
+    return render(request, 'quotes/addquote.html', {"tags": tags, "authors": authors,'form': QuoteForm()})

@@ -11,5 +11,6 @@ urlpatterns = [
     path('tags/<int:tag_id>', views.tags, name='tags'),
     path('addtag/', views.addtag, name='addtag'),
     path('addauthor/', views.addauthor, name='addauthor'),
+    path('addquote/', views.addquote, name='addquote'),
 ]
  
